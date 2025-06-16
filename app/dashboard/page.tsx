@@ -7,6 +7,7 @@ import Image from "next/image";
 import { fetchMoonPhase, MoonData } from "../lib/fetchMoonPhase";
 import { getRandomBirthdayFact } from "../lib/funFacts";
 import { getBirthstone } from "../lib/getBirthstone";
+import { getTopSongWithCover, TopSongWithCover } from "../lib/getTopSong";
 
 type ApodResponse = {
   url: string;
@@ -169,6 +170,12 @@ export default function Dashboard() {
 
   const birthstone = getBirthstone(birthdayRaw);
 
+  const [topSong, setTopSong] = useState<TopSongWithCover | null>(null);
+
+  useEffect(() => {
+    getTopSongWithCover(birthdayRaw).then(setTopSong);
+  }, [birthdayRaw]);
+
   return (
     <div className="min-h-screen bg-orange-50 text-black">
       <Navbar />
@@ -281,7 +288,7 @@ export default function Dashboard() {
                 alt="Moon decoration"
                 width={350}
                 height={300}
-                className="mb-[-250px]"
+                className="mb-[-260px]"
               />
             </div>
           </div>
@@ -292,9 +299,9 @@ export default function Dashboard() {
           </div>
 
           {/* Birthstone */}
-          <div className="md:col-span-4 md:row-span-4 bg-orange-600 p-8 rounded-2xl shadow-lg">
+          <div className="md:col-span-4 md:row-span-4 bg-orange-600 p-8 rounded-2xl shadow-lg flex">
             <div className="flex flex-col md:flex-row items-center gap-6">
-              <div className="flex-shrink-0">
+              <div className="flex-shrink-0 flex-col">
                 <Image
                   src={birthstone.image}
                   alt={birthstone.name}
@@ -308,9 +315,46 @@ export default function Dashboard() {
                 <h2 className="text-3xl font-extrabold text-white mb-3">
                   Your birthstone is {birthstone.name}
                 </h2>
-                <p className="text-lg font-bold text-orange-200 leading-relaxed">
+                <p className="text-lg font-bold text-orange-200">
                   {birthstone.description}
                 </p>
+              </div>
+            </div>
+          </div>
+
+          {/* Top Billboard Song Section */}
+          <div
+            className={`md:col-span-2 md:row-span-4 relative rounded-2xl shadow-lg overflow-hidden ${
+              topSong?.coverUrl ? "" : "bg-orange-200"
+            }`}
+            style={
+              topSong?.coverUrl
+                ? {
+                    backgroundImage: `url('${topSong.coverUrl}')`,
+                    backgroundSize: "cover",
+                    backgroundPosition: "center",
+                    minHeight: "300px",
+                  }
+                : { minHeight: "300px" }
+            }
+          >
+            {/* Gradient Overlay */}
+            <div className="absolute inset-0 bg-gradient-to-t from-black/100 to-transparent rounded-2xl" />
+
+            {/* Content Overlay */}
+            <div className="absolute inset-0 p-6 flex flex-col justify-end text-white z-10">
+              <div>
+                <h2 className="text-2xl font-bold mb-1">
+                  Top Song on Your Birthday
+                </h2>
+                {topSong ? (
+                  <>
+                    <p className="text-lg font-semibold mb-1">{topSong.song}</p>
+                    <p className="text-sm">by {topSong.artist}</p>
+                  </>
+                ) : (
+                  <p>Unable to load song</p>
+                )}
               </div>
             </div>
           </div>
